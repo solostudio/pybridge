@@ -8,7 +8,7 @@
 
 */
 
-#include <Python.h>
+#include "Python.h"
 #include <jni.h>
 #include <android/log.h>
 

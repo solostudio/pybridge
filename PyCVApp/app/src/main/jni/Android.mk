@@ -1,5 +1,6 @@
 LOCAL_PATH := $(call my-dir)
 
+# # D:/ProgramNI/Development/Android/android-sdk/ndk/19.2.5345600
 # Python-for-Android paths
 
 PYTHON_FOR_ANDROID_PATH := $(LOCAL_PATH)/../../../../../python-for-android

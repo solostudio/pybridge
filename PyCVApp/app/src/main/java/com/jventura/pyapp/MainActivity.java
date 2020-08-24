@@ -13,9 +13,12 @@ import android.widget.TextView;
 
 import com.jventura.pybridge.AssetExtractor;
 import com.jventura.pybridge.PyBridge;
+import com.jventura.pybridge.PythonUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.io.File;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -40,8 +43,16 @@ public class MainActivity extends AppCompatActivity {
         assetExtractor.copyAssets("python");
 
         // Get the extracted assets directory
-        Log.i("BYYD", "Path");
+        Log.i("BYYD", "Python Path in assets");
         String pythonPath = assetExtractor.getAssetsDataDir() + "python";
+
+
+        //
+        String app_root =  getFilesDir().getAbsolutePath() + "/app";
+        Log.i("BYYD", "PyBridge app_root: " + app_root);
+        File app_root_file = new File(app_root);
+        PythonUtil.loadLibraries(app_root_file,
+                new File(getApplicationInfo().nativeLibraryDir));
 
         // Start the Python interpreter
         Log.i("BYYD", "PyBridge Start: " + pythonPath);

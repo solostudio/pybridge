@@ -37,3 +37,5 @@ local.properties
 
 # OSX
 .DS_Store
+python-for-android/build/
+python-for-android/src/main/assets/private.mp3

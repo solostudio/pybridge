@@ -19,8 +19,7 @@
 /*   Android log   */
 /* --------------- */
 
-static PyObject *androidlog(PyObject *self, PyObject *args)
-{
+static PyObject *androidlog(PyObject *self, PyObject *args) {
     char *str;
     if (!PyArg_ParseTuple(args, "s", &str))
         return NULL;
@@ -31,28 +30,26 @@ static PyObject *androidlog(PyObject *self, PyObject *args)
 
 
 static PyMethodDef AndroidlogMethods[] = {
-    {"log", androidlog, METH_VARARGS, "Logs to Android stdout"},
-    {NULL, NULL, 0, NULL}
+        {"log", androidlog, METH_VARARGS, "Logs to Android stdout"},
+        {NULL, NULL, 0, NULL}
 };
 
 
 static struct PyModuleDef AndroidlogModule = {
-    PyModuleDef_HEAD_INIT,
-    "androidlog",        /* m_name */
-    "Log for Android",   /* m_doc */
-    -1,                  /* m_size */
-    AndroidlogMethods    /* m_methods */
+        PyModuleDef_HEAD_INIT,
+        "androidlog",        /* m_name */
+        "Log for Android",   /* m_doc */
+        -1,                  /* m_size */
+        AndroidlogMethods    /* m_methods */
 };
 
 
-PyMODINIT_FUNC PyInit_androidlog(void)
-{
+PyMODINIT_FUNC PyInit_androidlog(void) {
     return PyModule_Create(&AndroidlogModule);
 }
 
 
-void setAndroidLog()
-{
+void setAndroidLog() {
     // Inject  bootstrap code to redirect python stdin/stdout
     // to the androidlog module
     PyRun_SimpleString(
@@ -89,8 +86,7 @@ void setAndroidLog()
 
 */
 JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_start
-        (JNIEnv *env, jclass jc, jstring path)
-{
+        (JNIEnv *env, jclass jc, jstring path) {
     LOG("Initializing the Python interpreter");
 
     // Get the location of the python files
@@ -98,7 +94,8 @@ JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_start
 
     // Build paths for the Python interpreter
     char paths[512];
-    snprintf(paths, sizeof(paths), "%s:%s/stdlib.zip:%s/modules:%s/site-packages", pypath, pypath, pypath, pypath);
+    snprintf(paths, sizeof(paths), "%s:%s/stdlib.zip:%s/scripts:%s/modules:%s/site-packages",
+             pypath, pypath, pypath, pypath, pypath);
 
     // Set Python paths
     wchar_t *wchar_paths = Py_DecodeLocale(paths, NULL);
@@ -121,8 +118,7 @@ JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_start
 
 
 JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_stop
-        (JNIEnv *env, jclass jc)
-{
+        (JNIEnv *env, jclass jc) {
     LOG("Finalizing the Python interpreter");
     Py_Finalize();
     return 0;
@@ -136,8 +132,7 @@ JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_stop
 
 */
 JNIEXPORT jstring JNICALL Java_com_byyd_pybridge_PyBridge_call
-        (JNIEnv *env, jclass jc, jstring payload)
-{
+        (JNIEnv *env, jclass jc, jstring payload) {
     LOG("Call into Python interpreter");
 
     // Get the payload string
@@ -145,15 +140,15 @@ JNIEXPORT jstring JNICALL Java_com_byyd_pybridge_PyBridge_call
     const char *payload_utf = (*env)->GetStringUTFChars(env, payload, &iscopy);
 
     // Import module
-    PyObject* myModuleString = PyUnicode_FromString((char*)"bootstrap");
-    PyObject* myModule = PyImport_Import(myModuleString);
+    PyObject *myModuleString = PyUnicode_FromString((char *) "bootstrap");
+    PyObject *myModule = PyImport_Import(myModuleString);
 
     // Get reference to the router function
-    PyObject* myFunction = PyObject_GetAttrString(myModule, (char*)"router");
-    PyObject* args = PyTuple_Pack(1, PyUnicode_FromString(payload_utf));
+    PyObject *myFunction = PyObject_GetAttrString(myModule, (char *) "router");
+    PyObject *args = PyTuple_Pack(1, PyUnicode_FromString(payload_utf));
 
     // Call function and get the resulting string
-    PyObject* myResult = PyObject_CallObject(myFunction, args);
+    PyObject *myResult = PyObject_CallObject(myFunction, args);
     const char *myResultChar = PyUnicode_AsUTF8(myResult);
 
     // Store the result on a java.lang.String object

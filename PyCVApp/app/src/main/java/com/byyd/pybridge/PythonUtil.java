@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 
 public class PythonUtil {
-	private static final String TAG = "pythonutil";
+	private static final String TAG = "python_util";
 
     protected static void addLibraryIfExists(ArrayList<String> libsList, String pattern, File libsDir) {
         // pattern should be the name of the lib file, without the

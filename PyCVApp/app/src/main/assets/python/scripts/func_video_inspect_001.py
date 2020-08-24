@@ -1,25 +1,22 @@
-# encoding:utf8
-
 import cv2
 import numpy as np
-import os
 import datetime
-
-# from config import *
 
 """
 提取图中的红色部分
 """
 
-import tensorflow as tf
-from keras import backend as K
-
+"""
+import tensorflow.compat.v1 as tf
+import tensorflow.compat.v1.keras.backend as K
 graph = tf.get_default_graph()
+
 # keras使用gpu代码
 config = tf.ConfigProto()
 config.gpu_options.allow_growth = True
 sess = tf.Session(config=config)
 K.set_session(sess)
+"""
 
 
 # 计算色差变化趋势
@@ -31,7 +28,7 @@ def catch(y):
 
 
 # 参数选择
-def config_nor(colors, distance, len_s, size_local, sec):
+def config_nor_001(colors, distance, len_s, size_local, sec):
     """
     初始化参数配置函数
     colors:颜色  red:r, green:g, blue:b, gray:gr, black:bk, yellow:y, white: w, 其他:0
@@ -113,27 +110,22 @@ def config_nor(colors, distance, len_s, size_local, sec):
     return low_hsv1, high_hsv1, len_s, size_local, areas, upper_catch, upper_add, down_catch, sec, cunter_number
 
 
-def get_rtmp(inputvideo_, outvideo, config_s):
+def func_001(inputvideo, config_s):
     low_hsv1, high_hsv1, len_s, size_local, areas, upper_catch, upper_add, down_catch, sec, cunter_number = config_s
-    # os.environ['CUDA_VISIBLE_DEVICES'] = "0"
-    cap = cv2.VideoCapture(inputvideo_)
-    # fps = cap.get(cv2.CAP_PROP_FPS)  # 视频帧数
-    # size = (int(cap.get(cv2.CAP_PROP_FRAME_WIDTH)), int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT)))  # 尺寸
-    # fourcc = cv2.VideoWriter_fourcc('M', 'P', '4', '2')  # MP4编码
 
-    # out_video = cv2.VideoWriter(outvideo, fourcc, fps, size)  # 定义保存视频的格式
+    print("Start %s" % inputvideo)
+    cap = cv2.VideoCapture(inputvideo)
+    print("Connected %s" % inputvideo)
 
     # 记录初始时间状态
     nowtime = datetime.datetime.now()  # 获取当前时间
+    print("Start status: %s, time: %s" % (cap.isOpened(), nowtime))
 
     list_red = []
     list_b = []
     # global upper_catch, down_catch
     while cap.isOpened():
         ret, frame = cap.read()
-        # cv2.namedWindow("normal",0);
-        # cv2.resizeWindow("normal", 640, 480);
-        # cv2.imshow("normal", frame) 
 
         # 灰度图
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -141,9 +133,6 @@ def get_rtmp(inputvideo_, outvideo, config_s):
 
         # 高斯模糊
         guess = cv2.GaussianBlur(binary, (5, 5), 0)
-        # cv2.namedWindow("guess", 0)
-        # cv2.resizeWindow("guess", 640, 480)
-        # cv2.imshow("guess", guess)
 
         # 获取红色区域
         hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
@@ -158,11 +147,6 @@ def get_rtmp(inputvideo_, outvideo, config_s):
         result_get_d = cv2.erode(result_get, kernel_er)
         result_get_d2 = cv2.erode(result_get_d, kernel_di)
         # result_get_d2 = cv2.erode(result_get, kernel2)
-
-        # cv2.namedWindow("result_get_d2", 0)
-        # cv2.resizeWindow("result_get_d2", 640, 480)
-        # cv2.imshow("result_get_d2", result_get_d2)  # 单通道
-        # 时间渐变的形式。每秒钟去比较
 
         now_times = datetime.datetime.now() - nowtime  # 时间差
         time_delate = int(now_times.total_seconds())  # 时间规整
@@ -211,6 +195,7 @@ def get_rtmp(inputvideo_, outvideo, config_s):
                 cv2.line(frame, (i[0], i[1]), (i[0], i[1] + len_s), (20, 255, 0), 3, 88)
                 cv2.line(frame, (j[0], j[1]), (j[0] - len_s, j[1]), (20, 255, 0), 3, 88)
                 cv2.line(frame, (j[0], j[1]), (j[0], j[1] - len_s), (20, 255, 0), 3, 88)
+
         ########################## all_red = np.array(all_red,dtype=np.uint8)
         # 字体
         font = cv2.FONT_HERSHEY_SIMPLEX
@@ -229,7 +214,7 @@ def get_rtmp(inputvideo_, outvideo, config_s):
             # print(b, upper_catch)
             # print(type(upper_catch))
             if 10 > b > upper_catch:  # 呈上升趋势
-                print("检测到漏水..................", datetime.datetime.now())
+                print("BYYD py 检测到漏水..................", datetime.datetime.now())
                 cv2.putText(frame, "Water Leakage area detexted: Alarm reported", size_local, font, 0.5,
                             (0, 0, 255), 1)
             elif b < down_catch:  # 呈下降趋势
@@ -244,26 +229,18 @@ def get_rtmp(inputvideo_, outvideo, config_s):
         else:
             cv2.putText(frame, "Water Leakage area detextion...", size_local, font, 0.5, (25, 255, 20), 1)
 
-        # cv2.namedWindow("red_text", 0)
-        # cv2.resizeWindow("red_text", 640, 480)
-        # cv2.imshow("red_text", frame)
-        # out_video.write(frame)
-        # cv2.imwrite("1.jpg",frame)
-        # break
-        if cv2.waitKey(10) & 0xFF == ord("q"):
-            break
-        # break
     cap.release()
-    # out_video.release()
-    cv2.destroyAllWindows()
-    # out_video2.release()
+    print("BYYD CV2 Release")
 
 
 if __name__ == '__main__':
+    #
     video_path = "rtsp://192.168.0.151:554/stream2"
 
     # 参数定义
     # low_hsv1, high_hsv1, len_s, size_local, areas, upper_catch, upper_add, down_catch, sec, cunter_number \
-    config_all = config_nor(colors="r", distance="2", len_s=7, size_local=(50, 650), sec=3)
-    # 读取数据与保存位置
-    get_rtmp(inputvideo_=video_path, outvideo='Video_20.mp4', config_s=config_all)
+    config_all = config_nor_001(colors="r", distance="2", len_s=7, size_local=(50, 650), sec=3)
+
+    # 启动数据流分析
+    print("BYYD: Start Scan %s" % video_path)
+    func_001(video_path, config_all)

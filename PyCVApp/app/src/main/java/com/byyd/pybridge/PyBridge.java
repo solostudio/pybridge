@@ -44,9 +44,4 @@ public class PyBridge {
             return null;
         }
     }
-
-    // Load library
-    static {
-//        System.loadLibrary("pybridge");
-    }
 }

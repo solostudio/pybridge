@@ -7,7 +7,7 @@
  *
  */
 
-package com.jventura.pybridge;
+package com.byyd.pybridge;
 
 import android.content.Context;
 import android.content.SharedPreferences;

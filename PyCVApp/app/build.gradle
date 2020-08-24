@@ -5,7 +5,7 @@ android {
     buildToolsVersion '30.0.2'
 
     defaultConfig {
-        applicationId "com.jventura.pyapp"
+        applicationId "com.byyd.pycvapp"
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1

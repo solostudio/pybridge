@@ -1,19 +1,17 @@
-package com.jventura.pyapp;
+package com.byyd.pycvapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.content.DialogInterface;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 
-import com.jventura.pybridge.AssetExtractor;
-import com.jventura.pybridge.PyBridge;
-import com.jventura.pybridge.PythonUtil;
+import com.byyd.pybridge.AssetExtractor;
+import com.byyd.pybridge.PyBridge;
+import com.byyd.pybridge.PythonUtil;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -46,8 +44,7 @@ public class MainActivity extends AppCompatActivity {
         Log.i("BYYD", "Python Path in assets");
         String pythonPath = assetExtractor.getAssetsDataDir() + "python";
 
-
-        //
+        // Load Libs
         String app_root =  getFilesDir().getAbsolutePath() + "/app";
         Log.i("BYYD", "PyBridge app_root: " + app_root);
         File app_root_file = new File(app_root);

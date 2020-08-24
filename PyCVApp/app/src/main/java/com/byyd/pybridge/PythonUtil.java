@@ -1,4 +1,4 @@
-package com.jventura.pybridge;
+package com.byyd.pybridge;
 
 import android.util.Log;
 
@@ -40,11 +40,7 @@ public class PythonUtil {
         addLibraryIfExists(libsList, "SDL2_image", libsDir);
         addLibraryIfExists(libsList, "SDL2_mixer", libsDir);
         addLibraryIfExists(libsList, "SDL2_ttf", libsDir);
-        //libsList.add("python3.5m");
-        //libsList.add("python3.6m");
         libsList.add("python3.7m");
-        //libsList.add("python3.8m");
-        libsList.add("main");
         libsList.add("pybridge");
         return libsList;
     }

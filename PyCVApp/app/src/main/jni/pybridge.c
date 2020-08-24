@@ -88,7 +88,7 @@ void setAndroidLog()
     python files extracted from the assets folder.
 
 */
-JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
+JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_start
         (JNIEnv *env, jclass jc, jstring path)
 {
     LOG("Initializing the Python interpreter");
@@ -120,7 +120,7 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_start
 }
 
 
-JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_stop
+JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_stop
         (JNIEnv *env, jclass jc)
 {
     LOG("Finalizing the Python interpreter");
@@ -135,7 +135,7 @@ JNIEXPORT jint JNICALL Java_com_jventura_pybridge_PyBridge_stop
     file.
 
 */
-JNIEXPORT jstring JNICALL Java_com_jventura_pybridge_PyBridge_call
+JNIEXPORT jstring JNICALL Java_com_byyd_pybridge_PyBridge_call
         (JNIEnv *env, jclass jc, jstring payload)
 {
     LOG("Call into Python interpreter");

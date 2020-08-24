@@ -39,3 +39,4 @@ local.properties
 .DS_Store
 python-for-android/build/
 python-for-android/src/main/assets/private.mp3
+PyCVApp/app/build/

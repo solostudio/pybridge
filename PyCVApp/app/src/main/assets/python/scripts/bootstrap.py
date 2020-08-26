@@ -55,9 +55,9 @@ def start_func_001(args):
 
     # 启动数据流分析
     print("BYYD: Start Scan %s" % video_path)
-    func_001(video_path, config_all)
+    res = func_001(video_path, config_all)
 
-    return 'This is %s' % args['name']
+    return {'msg': 'success', 'code': res}
 
 
 def test(args):
@@ -70,6 +70,15 @@ def test(args):
     p2 = args['p2']
 
     try:
+        # OpenCV
+        import cv2
+        print(cv2.getBuildInformation())
+        video_path = video_path
+        print("Start %s" % video_path)
+        cap = cv2.VideoCapture(video_path)
+        print("Connected %s" % video_path)
+        print("BYYD: OpenCV Test PASS, Open RTSP Stream")
+
         # Test ZMQ
         start_zmq_test()
         print("BYYD: ZMQ Test PASS, Start ZMQ Server")
@@ -77,14 +86,6 @@ def test(args):
         # np
         print(np.array([1, 2, 3]))
         print("BYYD: NUMPY Test PASS")
-
-        # OpenCV
-        import cv2
-        video_path = video_path
-        print("Start %s" % video_path)
-        cap = cv2.VideoCapture(video_path)
-        print("Connected %s" % video_path)
-        print("BYYD: OpenCV Test PASS, Open RTSP Stream")
 
         print("BYYD: All Tests PASS")
     except Exception as e:

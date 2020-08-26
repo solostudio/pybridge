@@ -43,10 +43,12 @@
                 android:text="Scan" />
         </LinearLayout>
 
-        <TextView
-            android:id="@+id/textViewUrl"
+        <EditText
+            android:id="@+id/editTextUrl"
             android:layout_width="match_parent"
-            android:layout_height="44dp"
+            android:layout_height="wrap_content"
+            android:ems="10"
+            android:inputType="textPersonName"
             android:text="rtsp://192.168.0.151:554/stream2"
             android:textAlignment="center" />
 

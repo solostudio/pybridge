@@ -3,6 +3,7 @@ package com.byyd.pycvapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -26,7 +27,7 @@ import java.io.File;
 
 public class MainActivity extends AppCompatActivity {
 
-    private TextView textViewUrl;
+    private EditText editTextUrl;
     private TextView textView;
     private Button btnTest;
     private Button btnFunc001;
@@ -68,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void initUI() {
         textView = findViewById(R.id.textView);
-        textViewUrl = findViewById(R.id.textViewUrl);
+        editTextUrl = findViewById(R.id.editTextUrl);
 
         btnTest = findViewById(R.id.btnTest);
         btnTest.setOnClickListener(new View.OnClickListener() {
@@ -81,13 +82,13 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         JSONObject json = new JSONObject();
                         json.put("function", "test");
-                        json.put("link", textViewUrl.getText().toString());
+                        json.put("link", editTextUrl.getText().toString());
                         json.put("p1", "p1 for test");
                         json.put("p2", "p2 for test");
                         JSONObject result = PyBridge.call(json);
                         String answer = result.getString("result");
 
-                        showResult(Func_Test, answer);
+                        showResult(Func_Msg, answer);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -100,28 +101,34 @@ public class MainActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
-                textView.setText("开始滴水监控！滴水事件在python中触发，请检查后台日志；该事件可以通过zmq返回，Zmq已测试可用，请自行处理...任务完成！");
+                String msg = "开始滴水监控！滴水事件在python中触发，请检查后台日志；该事件可以通过zmq返回，Zmq已测试可用，请自行处理...任务完成！";
 
+                // Sub Thread
                 new Thread(() -> {
+                    showResult(Func_Msg, msg);
+
+                }).start();
+
+                // UI Thread
+                runOnUiThread(() -> {
                     try {
                         JSONObject json = new JSONObject();
                         json.put("function", "start_func_001");
-                        json.put("link", textViewUrl.getText().toString());
+                        json.put("link", editTextUrl.getText().toString());
                         JSONObject result = PyBridge.call(json);
                         String answer = result.getString("result");
 
-                        showResult(PING_001, answer);
+                        showResult(Func_Msg, answer);
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                }).start();
+                });
             }
         });
     }
 
 
-    private final byte Func_Test = 0x01;
-    private final byte PING_001 = 0x02;
+    private final byte Func_Msg = 0x01;
 
     private void showResult(byte func, String result) {
         Message msg = handler.obtainMessage();
@@ -135,11 +142,10 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
-                case Func_Test:
+                case Func_Msg:
                     textView.setText(msg.obj.toString());
                     break;
-                case PING_001:
-                    textView.setText(msg.obj.toString());
+                default:
                     break;
             }
             return false;

@@ -111,7 +111,10 @@ def config_nor_001(colors, distance, len_s, size_local, sec):
 
 
 def func_001(inputvideo, config_s):
+    state = -1
     low_hsv1, high_hsv1, len_s, size_local, areas, upper_catch, upper_add, down_catch, sec, cunter_number = config_s
+
+    print(cv2.getBuildInformation())
 
     print("Start %s" % inputvideo)
     cap = cv2.VideoCapture(inputvideo)
@@ -124,8 +127,10 @@ def func_001(inputvideo, config_s):
     list_red = []
     list_b = []
     # global upper_catch, down_catch
-    while cap.isOpened():
+    if cap.isOpened():
+        print("Start to get frame")
         ret, frame = cap.read()
+        print("got a frame")
 
         # 灰度图
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -196,8 +201,8 @@ def func_001(inputvideo, config_s):
                 cv2.line(frame, (j[0], j[1]), (j[0] - len_s, j[1]), (20, 255, 0), 3, 88)
                 cv2.line(frame, (j[0], j[1]), (j[0], j[1] - len_s), (20, 255, 0), 3, 88)
 
-        ########################## all_red = np.array(all_red,dtype=np.uint8)
         # 字体
+        state = 0
         font = cv2.FONT_HERSHEY_SIMPLEX
         if len(list_red) == cunter_number:  # 满足连续五组数据进行B=k值的计算
             a = 0
@@ -214,28 +219,34 @@ def func_001(inputvideo, config_s):
             # print(b, upper_catch)
             # print(type(upper_catch))
             if 10 > b > upper_catch:  # 呈上升趋势
-                print("BYYD py 检测到漏水..................", datetime.datetime.now())
-                cv2.putText(frame, "Water Leakage area detexted: Alarm reported", size_local, font, 0.5,
-                            (0, 0, 255), 1)
+                state = 1
+                print("BYYD py 检测到漏水..................", str(datetime.datetime.now()))
+                # cv2.putText(frame, "Water Leakage area detexted: Alarm reported", size_local, font, 0.5,
+                #             (0, 0, 255), 1)
             elif b < down_catch:  # 呈下降趋势
-                cv2.putText(frame, "Water Leakage area Repaired", size_local, font, 0.5, (255, 0, 0), 1)
+                print("Water Leakage area Repaired")
             else:
                 upper_catch = max(list_b) + upper_add  # 自适应阈值，根据稳定状态下的最大K值进行限定，并增加upper_add增加自适应的弹性值
 
                 if max(list_b) < 0:  # 如果一直在处理，upper_catch处于下降状态，我们则会去一个绝对值，辅助适应值
                     upper_catch = abs(max(list_b) - upper_add)
                     down_catch = -1.5 * abs(max(list_b) - upper_add)
-                cv2.putText(frame, "Water Leakage area detextion...", size_local, font, 0.5, (0, 255, 20), 1)
+                # cv2.putText(frame, "Water Leakage area detextion...", size_local, font, 0.5, (0, 255, 20), 1)
+                print("Water Leakage area detextion...")
         else:
-            cv2.putText(frame, "Water Leakage area detextion...", size_local, font, 0.5, (25, 255, 20), 1)
+            # cv2.putText(frame, "Water Leakage area detextion...", size_local, font, 0.5, (25, 255, 20), 1)
+            print("Water Leakage area detextion...", str(datetime.datetime.now()))
 
     cap.release()
     print("BYYD CV2 Release")
+    print("Water:", state)
+    return state
 
 
 if __name__ == '__main__':
     #
-    video_path = "rtsp://192.168.0.151:554/stream2"
+    #video_path = "rtsp://192.168.0.151:554/stream2"
+    #video_path = "rtmp://47.100.8.76:5656/live/demo"
 
     # 参数定义
     # low_hsv1, high_hsv1, len_s, size_local, areas, upper_catch, upper_add, down_catch, sec, cunter_number \

@@ -74,6 +74,8 @@ void setAndroidLog() {
 /* ------------------ */
 /*   Native methods   */
 /* ------------------ */
+//定义python对象
+PyObject* myModule;
 
 /**
     This function configures the location of the standard library,
@@ -106,8 +108,11 @@ JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_start
     Py_InitializeEx(0);
     setAndroidLog();
 
-    // Bootstrap
-    PyRun_SimpleString("import bootstrap");
+    // Test
+    PyRun_SimpleString("print('Hello Python')");
+
+    // Import module
+    myModule = PyImport_Import(PyUnicode_FromString((char *) "bootstrap"));
 
     // Cleanup
     (*env)->ReleaseStringUTFChars(env, path, pypath);
@@ -115,15 +120,6 @@ JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_start
 
     return 0;
 }
-
-
-JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_stop
-        (JNIEnv *env, jclass jc) {
-    LOG("Finalizing the Python interpreter");
-    Py_Finalize();
-    return 0;
-}
-
 
 /**
     This function is responsible for receiving a payload string
@@ -139,28 +135,41 @@ JNIEXPORT jstring JNICALL Java_com_byyd_pybridge_PyBridge_call
     jboolean iscopy;
     const char *payload_utf = (*env)->GetStringUTFChars(env, payload, &iscopy);
 
-    // Import module
-    PyObject *myModuleString = PyUnicode_FromString((char *) "bootstrap");
-    PyObject *myModule = PyImport_Import(myModuleString);
-
     // Get reference to the router function
     PyObject *myFunction = PyObject_GetAttrString(myModule, (char *) "router");
-    PyObject *args = PyTuple_Pack(1, PyUnicode_FromString(payload_utf));
+    PyObject *myArgs = PyTuple_Pack(1, PyUnicode_FromString(payload_utf));
 
     // Call function and get the resulting string
-    PyObject *myResult = PyObject_CallObject(myFunction, args);
+    PyObject *myResult = PyObject_CallObject(myFunction, myArgs);
     const char *myResultChar = PyUnicode_AsUTF8(myResult);
 
     // Store the result on a java.lang.String object
     jstring result = (*env)->NewStringUTF(env, myResultChar);
 
-    // Cleanup
+    // Release
     (*env)->ReleaseStringUTFChars(env, payload, payload_utf);
-    Py_DECREF(myModuleString);
-    Py_DECREF(myModule);
+
+    // Cleanup
     Py_DECREF(myFunction);
-    Py_DECREF(args);
+    Py_DECREF(myArgs);
     Py_DECREF(myResult);
 
     return result;
+}
+
+/**
+    This function is responsible for close
+
+*/
+JNIEXPORT jint JNICALL Java_com_byyd_pybridge_PyBridge_stop
+        (JNIEnv *env, jclass jc) {
+    LOG("Finalizing the Python interpreter");
+
+    // 所有线程执行完成之后，释放所有python对象
+    Py_DECREF(myModule);
+
+    //Release
+    Py_Finalize();
+
+    return 0;
 }

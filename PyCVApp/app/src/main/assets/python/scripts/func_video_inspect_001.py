@@ -2,6 +2,8 @@ import cv2
 import numpy as np
 import datetime
 
+from func_zmq import ZMessager
+
 """
 提取图中的红色部分
 """
@@ -18,7 +20,6 @@ sess = tf.Session(config=config)
 K.set_session(sess)
 """
 
-
 # 计算色差变化趋势
 def catch(y):
     number_k = 0
@@ -32,7 +33,7 @@ def config_nor_001(colors, distance, len_s, size_local, sec):
     """
     初始化参数配置函数
     colors:颜色  red:r, green:g, blue:b, gray:gr, black:bk, yellow:y, white: w, 其他:0
-    distance: 检测距离/m  0-1:0，1-5:1, 5-15:2, 15以上:3 
+    distance: 检测距离/m  0-1:0，1-5:1, 5-15:2, 15以上:3
     len_s: 检测框的长度
     size_local: 说明数字显示位置
     sec: 图片检测间隔/s
@@ -112,6 +113,8 @@ def config_nor_001(colors, distance, len_s, size_local, sec):
 
 def func_001(inputvideo, config_s):
     state = -1
+    msg = 'unknown'
+
     low_hsv1, high_hsv1, len_s, size_local, areas, upper_catch, upper_add, down_catch, sec, cunter_number = config_s
 
     #print(cv2.getBuildInformation())
@@ -123,14 +126,16 @@ def func_001(inputvideo, config_s):
     # 记录初始时间状态
     nowtime = datetime.datetime.now()  # 获取当前时间
     print("Start status: %s, time: %s" % (cap.isOpened(), nowtime))
+    if not cap.isOpened():
+        msg = '打开视频失败'
 
     list_red = []
     list_b = []
     # global upper_catch, down_catch
-    if cap.isOpened():
-        print("Start to get frame")
+    while cap.isOpened():
+        #print("Start to get frame")
         ret, frame = cap.read()
-        print("got a frame")
+        #print("got a frame")
 
         # 灰度图
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
@@ -220,7 +225,11 @@ def func_001(inputvideo, config_s):
             # print(type(upper_catch))
             if 10 > b > upper_catch:  # 呈上升趋势
                 state = 1
-                print("BYYD py 检测到漏水..................", str(datetime.datetime.now()))
+
+                msg = "%s 检测到漏水.................." % datetime.datetime.now()
+                print(msg)
+                ZMessager().send_msg(1, msg)
+
                 # cv2.putText(frame, "Water Leakage area detexted: Alarm reported", size_local, font, 0.5,
                 #             (0, 0, 255), 1)
             elif b < down_catch:  # 呈下降趋势
@@ -240,7 +249,8 @@ def func_001(inputvideo, config_s):
     cap.release()
     print("BYYD CV2 Release")
     print("Water:", state)
-    return state
+
+    return ZMessager().send_msg(state, '%s' % msg)
 
 
 if __name__ == '__main__':

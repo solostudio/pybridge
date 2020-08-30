@@ -8,12 +8,7 @@ import json
 import sys
 import traceback
 
-import zmq
-import numpy as np
-import cv2
-
 from func_video_inspect_001 import func_001, config_nor_001
-from func_zmq import start_zmq_test
 
 print("Starting 'bootstrap.py'")
 print(sys.path)
@@ -56,9 +51,7 @@ def start_func_001(args):
     # 启动数据流分析
     print("BYYD: Start Scan %s" % video_path)
     res = func_001(video_path, config_all)
-
-    return {'msg': 'success', 'code': res}
-
+    return res
 
 def test(args):
     """import"""
@@ -73,27 +66,30 @@ def test(args):
         # OpenCV
         import cv2
         print(cv2.getBuildInformation())
-
         video_path = video_path
         print("Start %s" % video_path)
         cap = cv2.VideoCapture(video_path)
         print("Connected %s" % video_path)
-        print("BYYD: OpenCV Test PASS, Open RTSP Stream")
+        print("BYYD: OpenCV Test PASS")
 
         # Test ZMQ
-        start_zmq_test()
-        print("BYYD: ZMQ Test PASS, Start ZMQ Server")
+        import zmq
+        context = zmq.Context()
+        socket = context.socket(zmq.REP)
+        socket.bind("tcp://*:8666")
+        print("BYYD: ZMQ Test PASS")
 
-        # np
+        # np Test
+        import numpy as np
         print(np.array([1, 2, 3]))
         print("BYYD: NUMPY Test PASS")
 
-        print("BYYD: All Tests PASS")
     except Exception as e:
         msg = '%s' % e
         print(msg)
         traceback.print_exc()
 
+    print("BYYD: All Tests PASS")
     return 'Python Libs Tests (Numpy, OpenCV, ZeroMQ)： %s' % msg
 
 

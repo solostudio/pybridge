@@ -18,11 +18,14 @@ import com.byyd.pybridge.PyFuncsCaller;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.zeromq.SocketType;
+import org.zeromq.ZContext;
+import org.zeromq.ZMQ;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG_BYYD = "BYYD";
-    
+
     private EditText editTextUrl;
     private TextView textView;
     private Button btnTest;
@@ -38,22 +41,53 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG_BYYD, "Init UI");
 
         // ============================================================
-        // PyFuncs Caller Init
-        PyFuncsCaller.instance().init(this);
+        // PyFuncs Start
+        PyFuncsCaller.instance().start(this);
+
+        // Start ZMQ service
+        new Thread(() -> {
+            try (ZContext context = new ZContext()) {
+                // Socket to talk to clients
+                ZMQ.Socket socket = context.createSocket(SocketType.REP);
+                socket.bind("tcp://*:6666");
+
+                while (!Thread.currentThread().isInterrupted()) {
+                    // Block until a message is received
+                    byte[] data = socket.recv(0);
+                    String str = new String(data, ZMQ.CHARSET);
+
+                    // Print the message
+                    Log.i(TAG_BYYD, "Received: " + str);
+                    showResult(Func_Msg, str);
+
+                    // Send a response
+                    socket.send("true".getBytes(ZMQ.CHARSET), 0);
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+
+        // PyFuncs Stop
+        PyFuncsCaller.instance().stop();
 
     }
 
     private void initUI() {
         textView = findViewById(R.id.textView);
         editTextUrl = findViewById(R.id.editTextUrl);
-        editTextUrl.setText("rtmp://47.100.8.76:5656/live/demo");
 
         btnTest = findViewById(R.id.btnTest);
         btnTest.setOnClickListener(new View.OnClickListener() {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
-                textView.setText("Python 图形计算库 测试，请等待测试结果...");
+                textView.setText("Python测试，请等待测试结果...");
 
                 new Thread(() -> {
                     try {
@@ -61,7 +95,7 @@ public class MainActivity extends AppCompatActivity {
                         params.put("link", editTextUrl.getText().toString());
                         params.put("p1", "p1 for test");
                         params.put("p2", "p2 for test");
-                        JSONObject result = PyFuncsCaller.instance().call(PyFuncs.TEST, params);
+                        JSONObject result = PyFuncsCaller.instance().call(PyFuncs.TEST, params, false);
                         String answer = result.getString("result");
 
                         showResult(Func_Msg, answer);
@@ -77,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
-                String msg = "开始滴水监控！滴水事件在python中触发，请检查后台日志；该事件可以通过zmq返回，Zmq已测试可用，请自行处理...任务完成！";
+                String msg = "开始滴水监控！滴水事件在python中触发，消息将通过zmq返回...任务完成！";
 
                 // Sub Thread
                 new Thread(() -> {
@@ -86,7 +120,7 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         JSONObject params = new JSONObject();
                         params.put("link", editTextUrl.getText().toString());
-                        JSONObject result = PyFuncsCaller.instance().call(PyFuncs.FUNC_001, params);
+                        JSONObject result = PyFuncsCaller.instance().call(PyFuncs.FUNC_001, params, true);
                         String answer = result.getString("result");
 
                         showResult(Func_Msg, answer);
@@ -94,17 +128,13 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
                 }).start();
-
-                // UI Thread
-                runOnUiThread(() -> {
-
-                });
             }
         });
     }
 
     // Show Result
     private final byte Func_Msg = 0x01;
+
     private void showResult(byte func, String result) {
         Message msg = handler.obtainMessage();
         msg.what = func;

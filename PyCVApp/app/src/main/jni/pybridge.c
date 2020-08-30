@@ -12,7 +12,7 @@
 #include <jni.h>
 #include <android/log.h>
 
-#define LOG(x) __android_log_write(ANDROID_LOG_INFO, "pybridge", (x))
+#define LOG(x) __android_log_write(ANDROID_LOG_INFO, "BYYD pybridge", (x))
 
 
 /* --------------- */

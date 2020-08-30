@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 
 
 public class PyLibsLoader {
-	private static final String TAG = "PyLibsLoader";
+	private static final String TAG = "BYYD PyLibsLoader";
 
     protected static void addLibraryIfExists(ArrayList<String> libsList, String pattern, File libsDir) {
         // pattern should be the name of the lib file, without the

@@ -34,6 +34,8 @@ public class PyFuncsCaller {
     public void init(Context context) {
         initAssets(context);
         loadLibs(context);
+
+        Log.i(TAG_BYYD, "PyBridge Inited");
     }
 
     private void loadLibs(Context context) {
@@ -48,7 +50,7 @@ public class PyFuncsCaller {
     }
 
     public void initAssets(Context context) {
-        Log.i(TAG_BYYD, "PyBridge Init Start: " + pythonPath);
+        Log.i(TAG_BYYD, "PyBridge Init Start");
 
         // Extract python files from assets
         PyAssetsExtractor pyAssetExtractor = new PyAssetsExtractor(context);
@@ -56,8 +58,8 @@ public class PyFuncsCaller {
         pyAssetExtractor.copyAssets("python");
 
         // Get the extracted assets directory
-        Log.i(TAG_BYYD, "Python Path in assets");
         pythonPath = pyAssetExtractor.getAssetsDataDir() + "python";
+        Log.i(TAG_BYYD, "Python assets extracted to " + pythonPath);
 
         Log.i(TAG_BYYD, "PyBridge Inited: " + pythonPath);
     }

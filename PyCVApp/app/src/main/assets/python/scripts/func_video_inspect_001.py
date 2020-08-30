@@ -226,7 +226,7 @@ def func_001(inputvideo, config_s):
             if 10 > b > upper_catch:  # 呈上升趋势
                 state = 1
 
-                msg = "%s 检测到漏水.................." % datetime.datetime.now()
+                msg = "%s 检测到漏水.........." % datetime.datetime.now()
                 print(msg)
                 ZMessager().send_msg(1, msg)
 

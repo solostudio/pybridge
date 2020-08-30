@@ -41,9 +41,6 @@ public class MainActivity extends AppCompatActivity {
         Log.i(TAG_BYYD, "Init UI");
 
         // ============================================================
-        // PyFuncs Start
-        PyFuncsCaller.instance().start(this);
-
         // Start ZMQ service
         new Thread(() -> {
             try (ZContext context = new ZContext()) {
@@ -67,6 +64,10 @@ public class MainActivity extends AppCompatActivity {
                 e.printStackTrace();
             }
         }).start();
+
+        // PyFuncs Start
+        PyFuncsCaller.instance().start(this);
+
     }
 
     @Override
@@ -75,7 +76,6 @@ public class MainActivity extends AppCompatActivity {
 
         // PyFuncs Stop
         PyFuncsCaller.instance().stop();
-
     }
 
     private void initUI() {
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
-                textView.setText("Python测试，请等待测试结果...");
+                showResult(Func_Msg, "Python测试，请等待测试结果...");
 
                 new Thread(() -> {
                     try {
@@ -111,7 +111,7 @@ public class MainActivity extends AppCompatActivity {
             @SuppressLint("SetTextI18n")
             @Override
             public void onClick(View v) {
-                String msg = "开始滴水监控！滴水事件在python中触发，消息将通过zmq返回...任务完成！";
+                String msg = "开始滴水监控！滴水事件在python中触发，消息将通过zmq返回";
 
                 // Sub Thread
                 new Thread(() -> {
@@ -143,11 +143,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Handler handler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
+        @SuppressLint("SetTextI18n")
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {
                 case Func_Msg:
-                    textView.setText(msg.obj.toString());
+                    textView.append("\n");
+                    textView.append(msg.obj.toString());
                     break;
                 default:
                     break;

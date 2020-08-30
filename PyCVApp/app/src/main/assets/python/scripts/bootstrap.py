@@ -9,9 +9,11 @@ import sys
 import traceback
 
 from func_video_inspect_001 import func_001, config_nor_001
+from func_zmq import ZMessager
 
 print("Starting 'bootstrap.py'")
 print(sys.path)
+ZMessager().send_msg(0, 'Python Env Start')
 
 
 def router(args):

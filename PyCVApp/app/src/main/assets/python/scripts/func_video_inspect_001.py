@@ -114,10 +114,10 @@ def func_001(inputvideo, config_s):
     state = -1
     low_hsv1, high_hsv1, len_s, size_local, areas, upper_catch, upper_add, down_catch, sec, cunter_number = config_s
 
-    print(cv2.getBuildInformation())
+    #print(cv2.getBuildInformation())
 
     print("Start %s" % inputvideo)
-    cap = cv2.VideoCapture(inputvideo)
+    cap = cv2.VideoCapture(inputvideo, cv2.CAP_FFMPEG)
     print("Connected %s" % inputvideo)
 
     # 记录初始时间状态
@@ -245,7 +245,7 @@ def func_001(inputvideo, config_s):
 
 if __name__ == '__main__':
     #
-    #video_path = "rtsp://192.168.0.151:554/stream2"
+    video_path = "rtsp://192.168.0.151:554/stream2"
     #video_path = "rtmp://47.100.8.76:5656/live/demo"
 
     # 参数定义

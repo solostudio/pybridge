@@ -3,30 +3,26 @@ package com.byyd.pycvapp;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-import android.text.Editable;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
-import com.byyd.pybridge.AssetExtractor;
-import com.byyd.pybridge.PyBridge;
-import com.byyd.pybridge.PythonUtil;
+import com.byyd.pybridge.PyFuncs;
+import com.byyd.pybridge.PyFuncsCaller;
 
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.File;
-
-
 public class MainActivity extends AppCompatActivity {
 
+    private static final String TAG_BYYD = "BYYD";
+    
     private EditText editTextUrl;
     private TextView textView;
     private Button btnTest;
@@ -39,37 +35,18 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
         initUI();
-        Log.i("BYYD", "Init UI");
+        Log.i(TAG_BYYD, "Init UI");
 
         // ============================================================
-        // Extract python files from assets
-        AssetExtractor assetExtractor = new AssetExtractor(this);
-        assetExtractor.removeAssets("python");
-        assetExtractor.copyAssets("python");
+        // PyFuncs Caller Init
+        PyFuncsCaller.instance().init(this);
 
-        // Get the extracted assets directory
-        Log.i("BYYD", "Python Path in assets");
-        String pythonPath = assetExtractor.getAssetsDataDir() + "python";
-
-        // Load Libs
-        String app_root = getFilesDir().getAbsolutePath() + "/app";
-        Log.i("BYYD", "PyBridge app_root: " + app_root);
-        File app_root_file = new File(app_root);
-        PythonUtil.loadLibraries(app_root_file,
-                new File(getApplicationInfo().nativeLibraryDir));
-
-        // Start the Python interpreter
-        Log.i("BYYD", "PyBridge Start: " + pythonPath);
-        PyBridge.start(pythonPath);
-
-        // Stop the interpreter
-        //PyBridge.stop();
-        // ============================================================
     }
 
     private void initUI() {
         textView = findViewById(R.id.textView);
         editTextUrl = findViewById(R.id.editTextUrl);
+        editTextUrl.setText("rtmp://47.100.8.76:5656/live/demo");
 
         btnTest = findViewById(R.id.btnTest);
         btnTest.setOnClickListener(new View.OnClickListener() {
@@ -80,16 +57,15 @@ public class MainActivity extends AppCompatActivity {
 
                 new Thread(() -> {
                     try {
-                        JSONObject json = new JSONObject();
-                        json.put("function", "test");
-                        json.put("link", editTextUrl.getText().toString());
-                        json.put("p1", "p1 for test");
-                        json.put("p2", "p2 for test");
-                        JSONObject result = PyBridge.call(json);
+                        JSONObject params = new JSONObject();
+                        params.put("link", editTextUrl.getText().toString());
+                        params.put("p1", "p1 for test");
+                        params.put("p2", "p2 for test");
+                        JSONObject result = PyFuncsCaller.instance().call(PyFuncs.TEST, params);
                         String answer = result.getString("result");
 
                         showResult(Func_Msg, answer);
-                    } catch (JSONException e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
                 }).start();
@@ -107,29 +83,28 @@ public class MainActivity extends AppCompatActivity {
                 new Thread(() -> {
                     showResult(Func_Msg, msg);
 
+                    try {
+                        JSONObject params = new JSONObject();
+                        params.put("link", editTextUrl.getText().toString());
+                        JSONObject result = PyFuncsCaller.instance().call(PyFuncs.FUNC_001, params);
+                        String answer = result.getString("result");
+
+                        showResult(Func_Msg, answer);
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }).start();
 
                 // UI Thread
                 runOnUiThread(() -> {
-                    try {
-                        JSONObject json = new JSONObject();
-                        json.put("function", "start_func_001");
-                        json.put("link", editTextUrl.getText().toString());
-                        JSONObject result = PyBridge.call(json);
-                        String answer = result.getString("result");
 
-                        showResult(Func_Msg, answer);
-                    } catch (JSONException e) {
-                        e.printStackTrace();
-                    }
                 });
             }
         });
     }
 
-
+    // Show Result
     private final byte Func_Msg = 0x01;
-
     private void showResult(byte func, String result) {
         Message msg = handler.obtainMessage();
         msg.what = func;
@@ -138,7 +113,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private Handler handler = new Handler(Looper.getMainLooper(), new Handler.Callback() {
-        @SuppressLint("SetTextI18n")
         @Override
         public boolean handleMessage(Message msg) {
             switch (msg.what) {

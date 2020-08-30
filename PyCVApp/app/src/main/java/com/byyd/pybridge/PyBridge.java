@@ -1,10 +1,9 @@
 package com.byyd.pybridge;
 
 import org.json.JSONObject;
-import org.json.JSONException;
 
 
-public class PyBridge {
+class PyBridge {
 
     /**
      * Initializes the Python interpreter.
@@ -35,13 +34,7 @@ public class PyBridge {
      * @param payload JSON payload
      * @return JSON response
      */
-    public static JSONObject call(JSONObject payload) {
-        String result = call(payload.toString());
-        try {
-            return new JSONObject(result);
-        } catch (JSONException e) {
-            e.printStackTrace();
-            return null;
-        }
+    public static String call(JSONObject payload) {
+        return call(payload.toString());
     }
 }

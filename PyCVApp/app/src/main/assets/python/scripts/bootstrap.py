@@ -73,6 +73,7 @@ def test(args):
         # OpenCV
         import cv2
         print(cv2.getBuildInformation())
+
         video_path = video_path
         print("Start %s" % video_path)
         cap = cv2.VideoCapture(video_path)
